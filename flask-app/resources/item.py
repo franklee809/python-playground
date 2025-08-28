@@ -1,11 +1,10 @@
-import uuid
+from flask import app, jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import db
-from models.item import ItemModel
 from schemas import ItemSchema, ItemUpdateSchema
 from models import ItemModel
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 bp = Blueprint("items", __name__, description="Operations on items")
 
@@ -20,6 +19,7 @@ class Item(MethodView):
         item = ItemModel.query.get_or_404(item_id)
         db.session.delete(item)
         db.session.commit()
+
         return {"message": "Item deleted."}
 
     @bp.arguments(ItemUpdateSchema)
@@ -48,12 +48,31 @@ class ItemList(MethodView):
     @bp.arguments(
         ItemSchema,
     )
+    @bp.response(201, ItemSchema)
     def post(self, item_data):
         item = ItemModel(**item_data)
         try:
             db.session.add(item)
             db.session.commit()
-        except SQLAlchemyError:
-            abort(500, "An error occurred while inserting the item.")
+        except SQLAlchemyError as e:
+            print(e)
+            abort(500, description="An error occurred while inserting the item.")
+        except IntegrityError as e:
+            print(e)
+            abort(400, description="An item with that name already exists.")
 
-        return item, 201
+        return item
+
+
+# @app.errorhandler(400)
+# def custom400(error):
+#     response = jsonify({"message": error.description})
+#     response.status_code = 400
+#     return response
+
+
+# @app.errorhandler(500)
+# def custom400(error):
+#     response = jsonify({"message": error.description})
+#     response.status_code = 500
+#     return response

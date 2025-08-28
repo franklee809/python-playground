@@ -28,7 +28,7 @@ class Store(MethodView):
 class StoreList(MethodView):
     @bp.response(200, StoreSchema(many=True))
     def get(self):
-        return stores.values()
+        return StoreModel.query.all()
 
     @bp.arguments(StoreSchema)
     @bp.response(200, StoreSchema)
