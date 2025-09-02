@@ -1,6 +1,7 @@
 import uuid
 from flask import jsonify
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required
 from flask_smorest import Blueprint, abort
 from db import db
 from models.store import StoreModel
@@ -10,8 +11,9 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 bp = Blueprint("stores", __name__, description="Operations on stores")
 
 
-@bp.route("/store/<string:store_id>")
+@bp.route("/store/<int:store_id>")
 class Store(MethodView):
+    @jwt_required()
     @bp.response(200, StoreSchema)
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
@@ -26,10 +28,12 @@ class Store(MethodView):
 
 @bp.route("/store")
 class StoreList(MethodView):
+    @jwt_required()
     @bp.response(200, StoreSchema(many=True))
     def get(self):
         return StoreModel.query.all()
 
+    @jwt_required()
     @bp.arguments(StoreSchema)
     @bp.response(200, StoreSchema)
     def post(self, store_data):

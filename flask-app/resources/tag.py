@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 bp = Blueprint("tags", __name__, description="Operations on tags")
 
 
-@bp.route("/store/<string:store_id>/tag")
+@bp.route("/store/<int:store_id>/tag")
 class TagInStore(MethodView):
     @bp.response(200, TagSchema(many=True))
     def get(self, store_id):
@@ -36,7 +36,7 @@ class TagInStore(MethodView):
         return tag
 
 
-@bp.route("/item/<string:item_id>/tag/<string:tag_id>")
+@bp.route("/item/<int:item_id>/tag/<string:tag_id>")
 class LinkTagsToItem(MethodView):
     @bp.response(HTTPStatus.CREATED, TagSchema)
     def post(self, item_id, tag_id):
@@ -68,7 +68,7 @@ class LinkTagsToItem(MethodView):
         return {"message": "Item removed from the tag.", "item": item, "tag": tag}
 
 
-@bp.route("/tag/<string:tag_id>")
+@bp.route("/tag/<int:tag_id>")
 class Tag(MethodView):
     @bp.response(200, TagSchema)
     def get(self, tag_id):
