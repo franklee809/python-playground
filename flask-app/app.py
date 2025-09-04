@@ -3,6 +3,7 @@ from flask import Flask, json, jsonify
 from flask_smorest import Api
 from resources.item import bp as ItemBlueprint
 from resources.store import bp as StoreBlueprint
+from blocklist import BLOCKLIST
 from resources.tag import bp as TagBlueprint
 from resources.user import bp as UserBlueprint
 from flask_jwt_extended import JWTManager
@@ -32,6 +33,19 @@ def create_app(db_url=None):
     api = Api(app)
     jwt = JWTManager(app)
 
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blocklist(jwt_header, jwt_payload):  # type: ignore
+        return jwt_payload["jti"] in BLOCKLIST
+
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return (
+            jsonify(
+                {"description": "The token has been revoked.", "error": "token_revoked"}
+            ),
+            401,
+        )
+
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity: str):
         app.logger.info("identity: ", identity)
@@ -40,7 +54,7 @@ def create_app(db_url=None):
         return {"is_admin": False}
 
     @jwt.expired_token_loader
-    def expired_token_callback(jwt_header, jwt_payload):
+    def expired_token_callback(jwt_header, jwt_payload):  # noqa: F811
         return jsonify(
             {"message": "The token has expired.", "error": "token_expired"}
         ), 401

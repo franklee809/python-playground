@@ -1,6 +1,8 @@
 from http import HTTPStatus
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+import jwt
+from blocklist import BLOCKLIST
 from db import db
 from models.user import UserModel
 from schemas import UserSchema
@@ -42,6 +44,7 @@ class UserLogin(MethodView):
 
 @bp.route("/user/<int:user_id>")
 class User(MethodView):
+    @jwt_required()
     @bp.response(HTTPStatus.OK, UserSchema)
     def get(self, user_id):
         return UserModel.query.get_or_404(user_id)
@@ -52,3 +55,12 @@ class User(MethodView):
         db.session.commit()
 
         return {"message": "User deleted."}, HTTPStatus.OK
+
+
+@bp.route("/logout")
+class UserLogout(MethodView):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"message": "Successfully logged out"}, HTTPStatus.OK
