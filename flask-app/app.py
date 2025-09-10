@@ -4,13 +4,10 @@ from flask_migrate import Migrate
 from flask_smorest import Api
 from extension import jwt
 
-from blocklist import BLOCKLIST
-
 from resources.item import bp as ItemBlueprint
 from resources.store import bp as StoreBlueprint
 from resources.tag import bp as TagBlueprint
 from resources.user import bp as UserBlueprint
-from flask_jwt_extended import JWTManager
 import models
 import secrets
 from db import db
