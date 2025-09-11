@@ -1,4 +1,3 @@
 mcp-playground
-pytest-playground
 .venv
 flask-app/instance/data.db
