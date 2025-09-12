@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./flask-app"
+    ],
+    "python.terminal.executeInFileDir": true
+}
