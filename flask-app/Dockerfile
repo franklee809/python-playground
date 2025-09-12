@@ -10,6 +10,6 @@ COPY . .
 
 EXPOSE 5000 
 
-RUN flask db migrate && flask db upgrade
+RUN flask db init && flask db migrate && flask db upgrade
 
 CMD ["flask", "run", "--host", "0.0.0.0"]
