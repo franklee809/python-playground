@@ -1,8 +1,39 @@
 version: '3'
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
-      - "5000:5000"
+      - "5000:80"
     volumes:
       - .:/app
+    depends_on:
+      - db
+    env_file:
+      - ./.flaskenv
+    networks:
+      - mynet
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+    volumes:
+      - postgres_data:/var/lib/postgresql/postgres_data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mynet
+networks:
+  mynet:
+    driver: bridge
+volumes:
+  postgres_data:
