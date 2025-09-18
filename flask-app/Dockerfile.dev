@@ -10,6 +10,7 @@ COPY . .
 
 EXPOSE 80 
 
-RUN flask db init && flask db migrate && flask db upgrade
+RUN flask db init 
+# flask db migrate && flask db upgrade
 
 CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:create_app()"]
